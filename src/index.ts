@@ -1,29 +1,23 @@
-import expres from "express";
-import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import { dbConnection } from "./db/db";
+import express from "express"
+import { dbConnect } from "./db"
+import dotenv from "dotenv"
+import cookieParser from "cookie-parser"
 
-dotenv.config();
-// express app
-const app = expres();
-// allow json data and cookies
-app.use(expres.json());
-app.use(cookieParser());
+dotenv.config()
 
-// cors settings
+const app = express()
+app.use(express.json())
+app.use(cookieParser())
 
-// app port
-const PORT = process.env.SERVER_PORT;
 
-// connect db and start the app
-dbConnection()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Sever is up and running on ${PORT}`);
-    });
-  })
-  .catch((error) => {
-    console.log(error);
-  });
+dbConnect()
+    .then(() => {
+        app.listen(`${process.env.SERVER_PORT}`)
+        console.log(`Server is up and running on port ${process.env.SERVER_PORT}`);
+    })
+    .catch((error) => {
+        console.log(error);
+    })
 
-// routes config
+import userRouter from "./routes/user.route"
+app.use("/api/v1/user", userRouter)
