@@ -17,6 +17,8 @@ const register = async (req: any, res: any) => {
     }
 
     const otp = generateOtp()
+    console.log(otp);
+    
     const hashedOtp = bcryptjs.hashSync(otp, 10)
     
 
@@ -35,8 +37,36 @@ const register = async (req: any, res: any) => {
     return res.cookie("otpVerifyToken", jwt_token).status(201).json({success: true, message: "User created successfully.", createdUser, jwt_token})
 }
 
+// Verify otp
+const verifyOtp = async (req: any, res: any) => {
+    const {otp} = req.body;
+    const user = req.userId
+    
+    const findUserById = await User.findById(user)
+
+    if (!findUserById) {
+        return res.status(404).json({success: false, message: "User not found."})
+    }
+
+    const dbOtp = findUserById.otp  
+    const bcryptOtp = bcryptjs.compareSync(otp, dbOtp)
+    if (!bcryptOtp) {
+        return res.status(401).json({success: false, message: "Wrong otp."})
+    }
+    console.log(bcryptOtp);
+    await findUserById.updateOne({
+        isVerified: true
+    }, {new: true})
+    
+    const updatedUser = await User.findById(findUserById._id).select("-password -otp")
+    
+    const jwt_token = jwt.sign({userId: findUserById._id}, `${process.env.SESSION_TOKEN}`, {expiresIn: "60m"})
+    
+    return res.cookie("sessionToken", jwt_token).status(200).json({success: true, message: "Otp verified successfully.", updatedUser, jwt_token})
+}
+
 // Login
 const login = (req:any, res:any) => {
     return res.status(200).json({message: "login"})
 }
-export {register, login}
+export {register, login, verifyOtp}
