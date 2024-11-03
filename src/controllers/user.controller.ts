@@ -30,11 +30,11 @@ const register = async (req: any, res: any) => {
         return res.status(500).json({success: false, message: "Internal server error"})
     }
 
-    const createdUser = await User.findById(createUser._id).select("-password -otp")
+    const user = await User.findById(createUser._id).select("-password -otp")
 
     const jwt_token = jwt.sign({userId: createUser._id}, `${process.env.EMAIL_JWT_SECRET}`, {expiresIn: "60m"})
 
-    return res.cookie("otpVerifyToken", jwt_token).status(201).json({success: true, message: "User created successfully.", createdUser, jwt_token})
+    return res.cookie("otpVerifyToken", jwt_token).status(201).json({success: true, message: "User created successfully.", user, jwt_token})
 }
 
 // Verify otp
@@ -66,7 +66,31 @@ const verifyOtp = async (req: any, res: any) => {
 }
 
 // Login
-const login = (req:any, res:any) => {
-    return res.status(200).json({message: "login"})
+const login = async (req:any, res:any) => {
+    const {email, password} = req.body;
+
+    const findUserByEmail = await User.findOne({email})
+    console.log(findUserByEmail);
+
+    if (!findUserByEmail) {
+        return res.status(400).json({success: false, message:"Either email is not register or wrong password."})
+    }
+
+    if (!findUserByEmail?.isVerified) {
+        return res.status(401).json({success: false, message: "Please verify your account before login."})
+    }
+
+    const comparePassword = bcryptjs.compareSync(password, findUserByEmail.password)
+    console.log(comparePassword);
+    
+    if (!comparePassword) {
+        return res.status(401).json({success: false, message: "Either email is not register or wrong password."})
+    }
+
+    const jwt_token = jwt.sign({userId: findUserByEmail._id}, `${process.env.SESSION_TOKEN}`)
+    const user = await User.findById(findUserByEmail._id).select("-password -otp")
+
+    return res.cookie("sessionToken", jwt_token).status(200).json({success: true, message: "Login success", user, jwt_token})
+    
 }
 export {register, login, verifyOtp}
