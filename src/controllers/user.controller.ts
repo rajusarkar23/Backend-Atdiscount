@@ -93,4 +93,23 @@ const login = async (req:any, res:any) => {
     return res.cookie("sessionToken", jwt_token).status(200).json({success: true, message: "Login success", user, jwt_token})
     
 }
-export {register, login, verifyOtp}
+
+// verify valid user
+const verifyValidOtpJwt = async (req: any, res: any) => {
+    const userId = req.userId
+    console.log(userId);
+    
+}
+
+//
+const findUserByJwt = async (req: any, res: any) => {
+    const userId = req.userId
+    console.log(userId);
+
+    const user = await User.findById(userId).select("-password -otp")
+    console.log(user);
+    return res.status(200).json({success: true, message: "User fetched successfully", user})
+    
+     
+}
+export {register, login, verifyOtp, verifyValidOtpJwt, findUserByJwt}

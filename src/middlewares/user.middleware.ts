@@ -22,3 +22,22 @@ export function otpAuthMiddleware (req: any, res: any, next: NextFunction) {
         return
     }
 }
+
+export function findUserByJwtMiddleware (req: any, res: any, next: NextFunction) {
+    const authHeader = req.headers["authorization"] ?? ""
+
+    try {
+        const decode = jwt.verify(authHeader, `${process.env.SESSION_TOKEN}`)
+        //@ts-ignore
+        if (decode.userId) {
+            //@ts-ignore
+            req.userId = decode.userId
+            return next()
+        } else {
+            return res.status(401).json({success: false, message: "You are not loged in"})
+        }
+    } catch (error) {
+        console.log(error);
+        return
+    }
+}
