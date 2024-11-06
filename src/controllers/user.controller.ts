@@ -101,7 +101,7 @@ const verifyValidOtpJwt = async (req: any, res: any) => {
     
 }
 
-//
+// find user by jwt
 const findUserByJwt = async (req: any, res: any) => {
     const userId = req.userId
     console.log(userId);
@@ -109,7 +109,25 @@ const findUserByJwt = async (req: any, res: any) => {
     const user = await User.findById(userId).select("-password -otp")
     console.log(user);
     return res.status(200).json({success: true, message: "User fetched successfully", user})
-    
-     
 }
-export {register, login, verifyOtp, verifyValidOtpJwt, findUserByJwt}
+
+// update full name
+const updateFullName = async (req:any, res: any) => {
+    const {fullName} = req.body
+    const userId = req.userId
+
+   const updateUser = await User.findByIdAndUpdate(userId, {fullName: fullName}, {new: true}).select("-password -otp")
+   return res.status(200).json({success: true, message: "Updated successfully.", updateUser})
+    
+}
+
+// update email
+const updateEmail = async (req: any, res: any) => {
+    const {email} = req.body;
+    const userId = req.userId
+
+    const updateUser = await User.findByIdAndUpdate(userId, {email: email}, {new: true}).select("-password -otp")
+    return res.status(200).json({success: true, message: "Updated successfully.", updateUser})
+}
+
+export {register, login, verifyOtp, verifyValidOtpJwt, findUserByJwt, updateFullName, updateEmail}
