@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { findUserByJwt, login, register, updateEmail, updateFullName, verifyOtp, verifyValidOtpJwt } from "../controllers/user.controller";
+import { findUserByJwt, login, register, AddAddress, updateEmail, updateFullName, verifyOtp, verifyValidOtpJwt } from "../controllers/user.controller";
 import { findUserByJwtMiddleware, otpAuthMiddleware } from "../middlewares/user.middleware";
 
 const router = Router()
@@ -11,5 +11,6 @@ router.post("/verify-valid-otp-jwt", otpAuthMiddleware, verifyValidOtpJwt)
 router.post("/find-user-by-jwt",findUserByJwtMiddleware,findUserByJwt)
 router.post("/update-fullName", findUserByJwtMiddleware, updateFullName)
 router.post("/update-email", findUserByJwtMiddleware, updateEmail)
+router.post("/add-address", findUserByJwtMiddleware, AddAddress)
 
 export default router

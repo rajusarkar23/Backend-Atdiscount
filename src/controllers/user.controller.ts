@@ -127,7 +127,39 @@ const updateEmail = async (req: any, res: any) => {
     const userId = req.userId
 
     const updateUser = await User.findByIdAndUpdate(userId, {email: email}, {new: true}).select("-password -otp")
+
+    if (!updateUser) {
+        return res.status(500).json({success: false, message: "Something went wrong."})
+    }
+
     return res.status(200).json({success: true, message: "Updated successfully.", updateUser})
 }
 
-export {register, login, verifyOtp, verifyValidOtpJwt, findUserByJwt, updateFullName, updateEmail}
+//
+const AddAddress = async (req: any, res: any) => {
+    const {streetOrLocality, city, pincode, state, country, mobileNumber} = req.body
+    console.log(streetOrLocality, city, pincode, state, country, mobileNumber);
+    const user  = req.userId;
+
+    const findUser = await User.findByIdAndUpdate(user, {
+        address: {
+            streetOrLocality: streetOrLocality,
+            city: city,
+            pincode: pincode,
+            state: state,
+            country: country,
+            mobileNumber: mobileNumber
+        }, 
+    }, {new: true})
+
+    if (!findUser) {
+        return res.status(500).json({success: false, message: "Something went wrong."})
+    }
+
+    const newUser = await User.findById(findUser._id).select("-password -otp")
+
+    return res.status(201).json({success: true, message: "Address added successfully", newUser})
+    
+}
+
+export {register, login, verifyOtp, verifyValidOtpJwt, findUserByJwt, updateFullName, updateEmail, AddAddress}
