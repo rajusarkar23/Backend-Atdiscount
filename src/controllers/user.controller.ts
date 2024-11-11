@@ -135,7 +135,7 @@ const updateEmail = async (req: any, res: any) => {
     return res.status(200).json({success: true, message: "Updated successfully.", updateUser})
 }
 
-//
+// add address
 const AddAddress = async (req: any, res: any) => {
     const {streetOrLocality, city, pincode, state, country, mobileNumber} = req.body
     console.log(streetOrLocality, city, pincode, state, country, mobileNumber);

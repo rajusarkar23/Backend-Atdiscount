@@ -26,5 +26,10 @@ dbConnect()
         console.log(error);
     })
 
+
+// USER ROUTES
 import userRouter from "./routes/user.route"
 app.use("/api/v1/user", userRouter)
+// SELLER ROUTES
+import sellerRouter from "./routes/seller.route"
+app.use("/api/v1/seller", sellerRouter)
