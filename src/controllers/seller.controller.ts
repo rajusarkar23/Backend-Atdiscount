@@ -37,4 +37,32 @@ const register = async (req: any, res: any) => {
     return res.cookie("otpVerifyToken", jwt_token).status(201).json({success: true, message: "User created successfully.", user, jwt_token})
 }
 
-export {register}
+// verify otp
+const verifyOtp = async (req: any, res: any) => {
+    const {otp} = req.body;
+    const seller = req.sellerId
+    
+    const findSellerById = await Seller.findById(seller)
+
+    if (!findSellerById) {
+        return res.status(404).json({success: false, message: "Seller not found."})
+    }
+
+    const dbOtp = findSellerById.otp  
+    const bcryptOtp = bcryptjs.compareSync(otp, dbOtp)
+    if (!bcryptOtp) {
+        return res.status(401).json({success: false, message: "Wrong otp."})
+    }
+    console.log(bcryptOtp);
+    await findSellerById.updateOne({
+        isVerified: true
+    }, {new: true})
+    
+    const updatedSeller = await Seller.findById(findSellerById._id).select("-password -otp")
+    
+    const jwt_token = jwt.sign({userId: findSellerById._id}, `${process.env.SELLER_SESSION_TOKEN}`, {expiresIn: "60m"})
+    
+    return res.cookie("sessionToken", jwt_token).status(200).json({success: true, message: "Otp verified successfully.", updatedSeller, jwt_token})
+}
+
+export {register, verifyOtp}
