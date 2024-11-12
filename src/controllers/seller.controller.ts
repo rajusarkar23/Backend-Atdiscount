@@ -1,4 +1,4 @@
-import { Seller } from "../models/seller.models";
+import { Seller } from "../models/seller.model";
 import { generateOtp } from "../utils";
 import bcryptjs from "bcryptjs"
 import jwt from "jsonwebtoken"
@@ -65,4 +65,32 @@ const verifyOtp = async (req: any, res: any) => {
     return res.cookie("sessionToken", jwt_token).status(200).json({success: true, message: "Otp verified successfully.", updatedSeller, jwt_token})
 }
 
-export {register, verifyOtp}
+// login
+const login = async (req: any, res: any) => {
+    const {email, password} = req.body;
+
+    const findSellerByEmail = await Seller.findOne({email})
+    console.log(findSellerByEmail);
+
+    if (!findSellerByEmail) {
+        return res.status(400).json({success: false, message:"Either email is not register or wrong password."})
+    }
+
+    if (!findSellerByEmail?.isVerified) {
+        return res.status(401).json({success: false, message: "Please verify your account before login."})
+    }
+
+    const comparePassword = bcryptjs.compareSync(password, findSellerByEmail.password)
+    console.log(comparePassword);
+    
+    if (!comparePassword) {
+        return res.status(401).json({success: false, message: "Either email is not register or wrong password."})
+    }
+
+    const jwt_token = jwt.sign({userId: findSellerByEmail._id}, `${process.env.SELLER_SESSION_TOKEN}`)
+    const user = await Seller.findById(findSellerByEmail._id).select("-password -otp")
+
+    return res.cookie("sessionToken", jwt_token).status(200).json({success: true, message: "Login success", user, jwt_token})
+}
+
+export {register, verifyOtp, login}

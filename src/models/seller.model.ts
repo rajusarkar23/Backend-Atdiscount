@@ -4,7 +4,7 @@ interface sellerModel extends Document {
     fullName: string,
     email: string,
     password: string,
-    isVerifies: boolean,
+    isVerified: boolean,
     otp: string
 }
 
@@ -21,7 +21,7 @@ const sellerSchema: Schema<sellerModel> = new Schema ({
         type: String,
         required: [true, "Password is required"]
     },
-    isVerifies: {
+    isVerified: {
         type: Boolean,
         default: false
     },
