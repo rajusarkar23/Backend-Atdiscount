@@ -2,6 +2,7 @@ import { Seller } from "../models/seller.model";
 import { generateOtp } from "../utils";
 import bcryptjs from "bcryptjs"
 import jwt from "jsonwebtoken"
+import {S3Client, PutObjectCommand} from "@aws-sdk/client-s3"
 
 // register
 const register = async (req: any, res: any) => {
@@ -93,4 +94,56 @@ const login = async (req: any, res: any) => {
     return res.cookie("sessionToken", jwt_token).status(200).json({success: true, message: "Login success", user, jwt_token})
 }
 
-export {register, verifyOtp, login}
+// upload image
+const upload = async (req: any, res: any) => {
+    const s3Client = new S3Client({
+        region: "auto",
+        endpoint: `${process.env.CLOUDFLARE_ENDPOINT}`,
+        credentials: {
+            accessKeyId: process.env.CLOUDFLARE_ACCESS_KEY_ID || "",
+            secretAccessKey: process.env.CLOUDFLARE_SECRET_ACCESS_KEY || ""
+        },
+        forcePathStyle: true
+    })
+
+    // console.log(s3Client);
+    
+
+    const file = req.file
+    console.log("file");
+    
+    console.log(file);
+    
+
+    try {
+        if (!req.file || req.file.length === 0) {
+            return res.status(400).json({success: false, message: "No file available"})
+        }     
+        
+            const uploadFiles = []
+
+        
+            const fileName = file.originalname
+
+            const uploadParams = {
+                Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
+                Key: fileName,
+                Body: req.file.buffer,
+                ContentType: req.file.mimetype
+            }
+            console.log(uploadParams);
+            
+            await s3Client.send( new PutObjectCommand(uploadParams))
+
+            const url = `${process.env.CLOUDFLARE_PUBLIC_URL}/${fileName}`
+
+            uploadFiles.push({fileName, url})
+        
+
+        return res.status(200).json({message: "Uploaded", uploadFiles})
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export {register, verifyOtp, login, upload}

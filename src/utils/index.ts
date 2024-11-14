@@ -1,3 +1,5 @@
+import multer, { memoryStorage } from "multer"
+
 export const DB_Name = "at-discount"
 
 // generate otp function
@@ -9,3 +11,10 @@ export function generateOtp(l=6) {
     }
     return otp
 }
+
+export const multerUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 5 * 1024 * 1024
+    }
+});
