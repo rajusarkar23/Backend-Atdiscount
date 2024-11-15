@@ -8,6 +8,6 @@ const router = Router()
 router.post("/register", register)
 router.post("/verify-otp", sellerOtpAuthMiddleware, verifyOtp)
 router.post("/login", login)
-router.post("/upload", multerUpload.single("image"), upload)
+router.post("/upload", multerUpload.single("file"), upload)
 
 export default router

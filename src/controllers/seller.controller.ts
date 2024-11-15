@@ -96,6 +96,8 @@ const login = async (req: any, res: any) => {
 
 // upload image
 const upload = async (req: any, res: any) => {
+
+    // setup s3client
     const s3Client = new S3Client({
         region: "auto",
         endpoint: `${process.env.CLOUDFLARE_ENDPOINT}`,
@@ -106,41 +108,32 @@ const upload = async (req: any, res: any) => {
         forcePathStyle: true
     })
 
-    // console.log(s3Client);
-    
-
-    const file = req.file
-    console.log("file");
-    
-    console.log(file);
-    
-
     try {
-        if (!req.file || req.file.length === 0) {
+        // if no file available error
+        if (!req.file) {
             return res.status(400).json({success: false, message: "No file available"})
-        }     
+        }  
         
+            // array for images that has been uploaded
             const uploadFiles = []
 
-        
-            const fileName = file.originalname
-
+            // extract original file name
+            const fileName = req.file.originalname
+            // set up upload 
             const uploadParams = {
                 Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
                 Key: fileName,
                 Body: req.file.buffer,
                 ContentType: req.file.mimetype
             }
-            console.log(uploadParams);
-            
+            // upload the file
             await s3Client.send( new PutObjectCommand(uploadParams))
-
+            // set the url
             const url = `${process.env.CLOUDFLARE_PUBLIC_URL}/${fileName}`
-
+            // push the url to the array
             uploadFiles.push({fileName, url})
         
-
-        return res.status(200).json({message: "Uploaded", uploadFiles})
+        return res.status(200).json({success: true, message: "Uploaded", uploadFiles})
     } catch (error) {
         console.log(error);
     }
