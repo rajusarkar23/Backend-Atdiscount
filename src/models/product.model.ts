@@ -4,7 +4,11 @@ interface productModel extends Document {
     title: string,
     specification: string[],
     price: string,
-    image: string[]
+    image: {
+        primary: string,
+        secondary: string,
+        tertiary: string
+    }
 }
 
 const productSchema: Schema<productModel> = new Schema ({
@@ -21,8 +25,15 @@ const productSchema: Schema<productModel> = new Schema ({
         required: [true, "Price is required"]
     },
     image: {
-        type: [String],
-        required: [true, "Image is required"]
+        primary: {
+            type: String
+        },
+        secondary: {
+            type: String
+        },
+        tertiary: {
+            type: String
+        }
     }
 }, {timestamps: true})
 

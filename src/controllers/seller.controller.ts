@@ -118,7 +118,7 @@ const upload = async (req: any, res: any) => {
             const uploadFiles = []
 
             // extract original file name
-            const fileName = req.file.originalname
+            const fileName = `${Math.floor(Math.random()*100)}_dkcbdcb65dhcb`
             // set up upload 
             const uploadParams = {
                 Bucket: process.env.CLOUDFLARE_BUCKET_NAME,
@@ -133,7 +133,7 @@ const upload = async (req: any, res: any) => {
             // push the url to the array
             uploadFiles.push({fileName, url})
         
-        return res.status(200).json({success: true, message: "Uploaded", uploadFiles})
+        return res.status(200).json({success: true, message: "Uploaded", url})
     } catch (error) {
         console.log(error);
     }
